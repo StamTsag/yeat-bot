@@ -1,0 +1,11 @@
+version: "3"
+services:
+  app:
+    build: .
+    command: node build/main.js
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - INVITE_URL=${INVITE_URL}
+      - IMAGEKIT_PRIVATE_KEY=${IMAGEKIT_PRIVATE_KEY}
+      - IMAGEKIT_PUBLIC_KEY=${IMAGEKIT_PUBLIC_KEY}
+      - IMAGEKIT_URL_ENDPOINT=${IMAGEKIT_URL_ENDPOINT}
