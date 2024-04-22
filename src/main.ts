@@ -30,22 +30,126 @@ export const bot = new Client({
   },
 });
 
-bot.once("ready", async () => {
-  // Keep alive if needed
-  if (process.env.KEEP_ALIVE) {
-    const app = express();
+async function setupSpotify() {
+  console.log(`Setting up Spotify...`);
 
-    app.get("/keep-alive", (_, res) => {
-      res.status(200).send("Luh Geeky");
-    });
+  const clientId = process.env.SPOTIFY_CLIENT_ID;
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+  const refreshToken = `${process.env.SPOTIFY_REFRESH_TOKEN}`;
+  const url = "https://accounts.spotify.com/api/token";
 
-    app.listen(process.env.PORT || 3000);
+  async function updateAccessToken() {
+    const payload = {
+      method: "POST",
 
-    console.log(`Keep alive server enabled`);
+      headers: {
+        Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+
+      body: new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+        client_id: clientId,
+      }),
+    };
+    const body = await fetch(url, payload);
+    const response = await body.json();
+
+    if (response.error) {
+      console.log(`Error updating Spotify credentials, error shown below`);
+
+      console.log(response);
+
+      process.exit(1);
+    }
+
+    process.env.SPOTIFY_ACCESS_TOKEN = response.access_token;
+
+    return response as {
+      access_token: string;
+      token_type: string;
+      expires_in: number;
+    };
   }
 
+  const res = await updateAccessToken();
+
+  setInterval(() => {
+    updateAccessToken();
+  }, res.expires_in * 1000); // in ms
+
+  console.log(`Spotify credentials setup.`);
+}
+
+function setupKeepAlive() {
+  console.log("Starting keep alive server...");
+
+  const app = express();
+
+  app.get("/keep-alive", (_, res) => {
+    res.status(200).send("Luh Geeky");
+  });
+
+  app.listen(process.env.PORT || 3000);
+
+  console.log(`Keep alive server enabled.`);
+}
+
+function showYeatASCII() {
+  console.log(`+=============--------------=======-===============
+=========-----------------==%@@@%==---------=======
+======-------------------==%@@@@@@#=-----------====
+===----------------------+@@@@@@@@@#=-------------=
+=---------------====--==#@@@@%%%%%@@@+=-----=------
+-------------+%@%@@##+=#@@@@@%%%%%%%@@@%#@@@@%=----
+------------%@@@@@@#+===#%@@@@@@@@@@@%====#@@@@%=--
+-----------=%@@@@@@@@@%@@@@@%@@@@@@@@@@%#@@@@@@%=--
+-----------%%%%%%%%%%%@@@@@%#@@@%#%@@@%@%%%@@@%=---
+-----------=#%%%#++%%#%@@@@@@@@@@@@@%%@@#%%%%%=----
+-------------------%@%#%@@#%@@@@###%%@@%=----------
+-------------------##%@%%%@%@@@@%%@@@@%@+----------
+-------------------#%#%@@@%@@@@@@%%%@#@@+----------
+-------------------#@%###@@@@@@@@@%#%#@%#----------
+-------------------*%#@@%#%@@@@@@@%@@@%@%----------
+-------------------%@##@@@#@@#%@@@@####@@----------
+------------------=%@%#+*%%#*+*%%@@@##@%@=---------
+------------------+@%%@%+#**++*%%@@%%%%%@=---------
+------------------+@@*+%##%*%##%**%@@#*@%----------
+------------------+@@@##++@@@%%%%#@#@#@@@----------
+------------------+@%@#+=*@@@%%@%%*@%%#*@----------
+------------------+@@##+=*@@*%%@@*%@@@%@%----------
+------------------#@@%#+#%@#+%%%%#%*+#%@@=---------
+------------------%@@#*+%%@=+%%@+##==#%@%----------
+-----------------=%@%@@%%@*=*%#@@@===%@@=----------
+-----------------=#@%@#*%@==+%@%@@=-+%@=-----------
+-----------------=#%%@%%@%=-+@@##%--+%+------------
+------------------*#*%%%@*--+@@*%*-----------------
+--------------------#%+%%+--+%%*@+----------------=
+========--=--------=%%#@@=--*@@#@+-================
+===========-=--=---=%%#%#=-=%@%#%---===============
+==------------------*##%+--=#%#%=----------========
+-------------------+@@@@#---%@@@@%=--------------==
+-----------------+%@@@@@%+--%@@@@@%----------------
+----------------+#%%@@%%%=---+%%#%+----------------
+------------------++++=----------------------------
+  `);
+}
+
+bot.once("ready", async () => {
   // Synchronize applications commands with Discord
   await bot.initApplicationCommands();
+
+  if (process.env.SPOTIFY_REFRESH_TOKEN) {
+    await setupSpotify();
+  }
+
+  // Keep alive if needed
+  if (process.env.KEEP_ALIVE) {
+    setupKeepAlive();
+  }
+
+  if (process.env.NODE_ENV == "production") showYeatASCII();
 
   console.log("Yeat is cookin'");
 });
