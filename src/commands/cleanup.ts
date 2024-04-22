@@ -14,7 +14,11 @@ export class Example {
     const ownerId = (await interaction.client.application.fetch()).owner.id;
 
     if (interaction.user.id != ownerId) {
-      await interaction.reply("You can't use this");
+      await interaction.reply({
+        content: "You can't use this",
+        ephemeral: true,
+      });
+
       return;
     }
 
