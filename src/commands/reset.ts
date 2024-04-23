@@ -1,3 +1,4 @@
+import { PrismaClient } from "@prisma/client";
 import type { CommandInteraction } from "discord.js";
 import { Discord, Slash } from "discordx";
 import ImageKit from "imagekit";
@@ -31,6 +32,13 @@ export class Example {
     try {
       // Delete all config at once
       await imagekit.deleteFolder("yeat");
+
+      // Delete database aswell
+      const prisma = new PrismaClient();
+
+      await prisma.guilds.deleteMany({});
+
+      await prisma.$disconnect();
 
       await interaction.reply({
         content: "Bot reset.",
