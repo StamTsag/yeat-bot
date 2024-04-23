@@ -6,6 +6,7 @@ export class Example {
   @Slash({
     description: "Kills Luh Geeky (Owner only)",
     name: "kill",
+    guilds: ["1222698648907813025"],
   })
   async kill(interaction: CommandInteraction): Promise<void> {
     const ownerId = (await interaction.client.application.fetch()).owner.id;
