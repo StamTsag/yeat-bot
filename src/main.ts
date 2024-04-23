@@ -147,9 +147,8 @@ bot.once("ready", async () => {
   // Keep alive if needed
   if (process.env.KEEP_ALIVE) {
     setupKeepAlive();
+    showYeatASCII();
   }
-
-  if (process.env.NODE_ENV == "production") showYeatASCII();
 
   console.log("Yeat is cookin'");
 });
