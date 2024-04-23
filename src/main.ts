@@ -145,7 +145,7 @@ bot.once("ready", async () => {
   }
 
   // Keep alive if needed
-  if (process.env.KEEP_ALIVE) {
+  if (process.env.KEEP_ALIVE.toLowerCase() == "true") {
     setupKeepAlive();
     showYeatASCII();
   }

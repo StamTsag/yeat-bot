@@ -24,7 +24,7 @@ export class Example {
     }
 
     await interaction.reply({
-      content: `Bot uptime is \`${uptimeToFormatted()}\``,
+      content: `Luh Geeky uptime is \`${uptimeToFormatted()}\``,
       ephemeral: true,
     });
   }
