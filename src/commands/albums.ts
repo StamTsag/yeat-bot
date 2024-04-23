@@ -24,14 +24,36 @@ interface Artist {
   popularity: number;
 }
 
+interface Album {
+  album_type: string;
+  total_tracks: number;
+
+  external_urls: {
+    spotify: string;
+  };
+
+  href: string;
+  id: string;
+
+  images: {
+    url: string;
+    height: number;
+    width: number;
+  }[];
+
+  name: string;
+  release_date: string;
+}
+
 @Discord()
 export class Example {
   @Slash({
-    description: "Shows Luh Geeky's stats",
-    name: "yeat",
+    description: "Shows Luh Geeky's albums",
+    name: "albums",
   })
-  async yeat(interaction: CommandInteraction): Promise<void> {
+  async albums(interaction: CommandInteraction): Promise<void> {
     const YEAT_ID = "3qiHUAX7zY4Qnjx8TNUzVx";
+    const ALBUMS_URL = `https://api.spotify.com/v1/artists/${YEAT_ID}/albums?include_groups=album`;
     const ARTIST_URL = `https://api.spotify.com/v1/artists/${YEAT_ID}`;
 
     const artist = (await (
@@ -42,6 +64,16 @@ export class Example {
       })
     ).json()) as Artist;
 
+    const albums = (
+      await (
+        await fetch(ALBUMS_URL, {
+          headers: {
+            Authorization: `Bearer ${process.env.SPOTIFY_ACCESS_TOKEN}`,
+          },
+        })
+      ).json()
+    ).items as Album[];
+
     const embed = new EmbedBuilder({
       color: 0x000000,
       author: {
@@ -49,26 +81,16 @@ export class Example {
         iconURL: artist.images[0].url,
         url: artist.external_urls.spotify,
       },
-
-      fields: [
-        {
-          name: "Popularity",
-          value: artist.popularity.toString(),
-        },
-        {
-          name: "Genres",
-          value: artist.genres.join(", "),
-        },
-        {
-          name: "Followers",
-          value: artist.followers.total.toString(),
-        },
-      ],
-
-      image: {
-        url: artist.images[0].url,
-      },
     });
+
+    for (const album of albums) {
+      embed.addFields([
+        {
+          name: album.name,
+          value: `${album.total_tracks} tracks | ${album.release_date}`,
+        },
+      ]);
+    }
 
     await interaction.reply({
       embeds: [embed],

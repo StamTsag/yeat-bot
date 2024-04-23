@@ -27,11 +27,12 @@ interface Artist {
 @Discord()
 export class Example {
   @Slash({
-    description: "Shows Luh Geeky's stats",
-    name: "yeat",
+    description: "Shows Luh Geeky's related artists",
+    name: "related",
   })
-  async yeat(interaction: CommandInteraction): Promise<void> {
+  async related(interaction: CommandInteraction): Promise<void> {
     const YEAT_ID = "3qiHUAX7zY4Qnjx8TNUzVx";
+    const RELATED_URL = `https://api.spotify.com/v1/artists/${YEAT_ID}/related-artists`;
     const ARTIST_URL = `https://api.spotify.com/v1/artists/${YEAT_ID}`;
 
     const artist = (await (
@@ -42,33 +43,36 @@ export class Example {
       })
     ).json()) as Artist;
 
+    const related = (
+      await (
+        await fetch(RELATED_URL, {
+          headers: {
+            Authorization: `Bearer ${process.env.SPOTIFY_ACCESS_TOKEN}`,
+          },
+        })
+      ).json()
+    ).artists as Artist[];
+
     const embed = new EmbedBuilder({
       color: 0x000000,
+      url: "",
       author: {
         name: artist.name,
         iconURL: artist.images[0].url,
         url: artist.external_urls.spotify,
       },
-
-      fields: [
-        {
-          name: "Popularity",
-          value: artist.popularity.toString(),
-        },
-        {
-          name: "Genres",
-          value: artist.genres.join(", "),
-        },
-        {
-          name: "Followers",
-          value: artist.followers.total.toString(),
-        },
-      ],
-
-      image: {
-        url: artist.images[0].url,
-      },
     });
+
+    for (let i = 0; i < 5; i++) {
+      const artist = related[i];
+
+      embed.addFields([
+        {
+          name: artist.name,
+          value: `Popularity: ${artist.popularity}`,
+        },
+      ]);
+    }
 
     await interaction.reply({
       embeds: [embed],

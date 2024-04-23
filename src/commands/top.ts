@@ -24,14 +24,34 @@ interface Artist {
   popularity: number;
 }
 
+interface Track {
+  external_urls: {
+    spotify: string;
+  };
+
+  href: string;
+  id: string;
+
+  images: {
+    url: string;
+    height: number;
+    width: number;
+  }[];
+
+  name: string;
+  popularity: number;
+  release_date: string;
+}
+
 @Discord()
 export class Example {
   @Slash({
-    description: "Shows Luh Geeky's stats",
-    name: "yeat",
+    description: "Shows Luh Geeky's top tracks",
+    name: "top",
   })
-  async yeat(interaction: CommandInteraction): Promise<void> {
+  async top(interaction: CommandInteraction): Promise<void> {
     const YEAT_ID = "3qiHUAX7zY4Qnjx8TNUzVx";
+    const TOP_URL = `https://api.spotify.com/v1/artists/${YEAT_ID}/top-tracks`;
     const ARTIST_URL = `https://api.spotify.com/v1/artists/${YEAT_ID}`;
 
     const artist = (await (
@@ -42,6 +62,16 @@ export class Example {
       })
     ).json()) as Artist;
 
+    const topTracks = (
+      await (
+        await fetch(TOP_URL, {
+          headers: {
+            Authorization: `Bearer ${process.env.SPOTIFY_ACCESS_TOKEN}`,
+          },
+        })
+      ).json()
+    ).tracks as Track[];
+
     const embed = new EmbedBuilder({
       color: 0x000000,
       author: {
@@ -49,26 +79,18 @@ export class Example {
         iconURL: artist.images[0].url,
         url: artist.external_urls.spotify,
       },
-
-      fields: [
-        {
-          name: "Popularity",
-          value: artist.popularity.toString(),
-        },
-        {
-          name: "Genres",
-          value: artist.genres.join(", "),
-        },
-        {
-          name: "Followers",
-          value: artist.followers.total.toString(),
-        },
-      ],
-
-      image: {
-        url: artist.images[0].url,
-      },
     });
+
+    for (let i = 0; i < 5; i++) {
+      const track = topTracks[i];
+
+      embed.addFields([
+        {
+          name: track.name,
+          value: `Popularity: ${track.popularity}`,
+        },
+      ]);
+    }
 
     await interaction.reply({
       embeds: [embed],
