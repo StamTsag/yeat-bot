@@ -1,18 +1,25 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "outDir": "build",
-    "rootDir": "src",
+    "outDir": "./output",
+    "target": "ES2020",
+    "removeComments": false,
+    "pretty": true,
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "baseUrl": "src",
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "strictFunctionTypes": true,
     "strict": false,
-    "moduleResolution": "Node",
+    "noEmit": true,
     "allowSyntheticDefaultImports": true,
-
     "experimentalDecorators": true,
     "emitDecoratorMetadata": false,
-
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "skipLibCheck": true
   },
-  "exclude": ["build", "node_modules"]
+  "include": ["src/**/*"],
+  "exclude": ["build", "node_modules"],
+  "ts-node": {
+    "swc": true
+  }
 }

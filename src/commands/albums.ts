@@ -1,49 +1,6 @@
 import { EmbedBuilder, type CommandInteraction } from "discord.js";
 import { Discord, Slash } from "discordx";
-
-interface Artist {
-  external_urls: {
-    spotify: string;
-  };
-
-  followers: {
-    total: number;
-  };
-
-  genres: string[];
-  href: string;
-  id: string;
-
-  images: {
-    url: string;
-    height: number;
-    width: number;
-  }[];
-
-  name: string;
-  popularity: number;
-}
-
-interface Album {
-  album_type: string;
-  total_tracks: number;
-
-  external_urls: {
-    spotify: string;
-  };
-
-  href: string;
-  id: string;
-
-  images: {
-    url: string;
-    height: number;
-    width: number;
-  }[];
-
-  name: string;
-  release_date: string;
-}
+import { Album, Artist } from "../interfaces";
 
 @Discord()
 export class Example {

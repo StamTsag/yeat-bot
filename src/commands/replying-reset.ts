@@ -1,15 +1,14 @@
 import type { CommandInteraction } from "discord.js";
 import { Discord, Slash } from "discordx";
-import { prisma } from "../vars";
-import { toggleLoggingId } from "main";
+import { prisma } from "vars";
 
 @Discord()
 export class Example {
   @Slash({
-    description: "Enables/Disables Luh Geeky replying based on chat history",
-    name: "replying",
+    description: "Resets Luh Geeky replying data (Server owner only)",
+    name: "reset-replying",
   })
-  async replying(interaction: CommandInteraction): Promise<void> {
+  async kill(interaction: CommandInteraction): Promise<void> {
     const ownerId = (await interaction.client.application.fetch()).owner.id;
     const guildOwner = interaction.guild.ownerId;
     const guildId = interaction.guild.id;
@@ -32,20 +31,19 @@ export class Example {
 
       select: {
         logging: true,
+        prompts: true,
       },
     });
 
     // Create if not found
-    if (!guild) {
-      guild = await prisma.guilds.create({
-        data: {
-          guildId,
-        },
+    if (!guild || !guild.logging || guild.prompts.length == 0) {
+      await interaction.reply({
+        content: "Luh Geeky got no data for your server",
+        ephemeral: true,
       });
-    }
 
-    // Toggle logging
-    const newLogging = !guild.logging;
+      return;
+    }
 
     await prisma.guilds.update({
       where: {
@@ -53,16 +51,12 @@ export class Example {
       },
 
       data: {
-        logging: newLogging,
+        prompts: {
+          set: [],
+        },
       },
     });
 
-    toggleLoggingId(guildId);
-
-    if (newLogging) {
-      await interaction.reply("Luh Geeky will now reply to yall");
-    } else {
-      await interaction.reply("Luh Geeky will ignore yall now");
-    }
+    await interaction.reply("Luh Geeky forgot about yall's chat history");
   }
 }

@@ -1,14 +1,15 @@
-import { PrismaClient } from "@prisma/client";
 import type { CommandInteraction } from "discord.js";
 import { Discord, Slash } from "discordx";
 import ImageKit from "imagekit";
+import { prisma } from "../vars";
+import { resetLoggingIds } from "main";
 
 @Discord()
 export class Example {
   @Slash({
     description: "Brainwash Luh Geeky (Owner only)",
     name: "reset",
-    guilds: ["1222698648907813025"],
+    guilds: [process.env.OWNER_GUILD_ID],
   })
   async cleanup(interaction: CommandInteraction): Promise<void> {
     // @ts-ignore
@@ -32,23 +33,18 @@ export class Example {
     try {
       // Delete all config at once
       await imagekit.deleteFolder("yeat");
-
-      // Delete database aswell
-      const prisma = new PrismaClient();
-
-      await prisma.guilds.deleteMany({});
-
-      await prisma.$disconnect();
-
-      await interaction.reply({
-        content: "Bot reset.",
-        ephemeral: true,
-      });
     } catch (e) {
-      await interaction.reply({
-        content: "Nothing to reset.",
-        ephemeral: true,
-      });
+      // empty folder
     }
+
+    // Delete database aswell
+    await prisma.guilds.deleteMany({});
+
+    resetLoggingIds();
+
+    await interaction.reply({
+      content: "Bot reset.",
+      ephemeral: true,
+    });
   }
 }

@@ -1,10 +1,10 @@
-import { dirname, importx } from "@discordx/importer";
-import { PrismaClient } from "@prisma/client";
+import { importx } from "@discordx/importer";
 import type { Interaction, Message } from "discord.js";
 import { IntentsBitField } from "discord.js";
 import { Client } from "discordx";
 import { configDotenv } from "dotenv";
 import express from "express";
+import { prisma } from "./vars";
 
 configDotenv();
 
@@ -44,8 +44,6 @@ function getMinMax(min: number, max: number) {
 }
 
 async function addMessagePrompt(guildId: string, prompt: string) {
-  const prisma = new PrismaClient();
-
   const guild = await prisma.guilds.findUnique({
     where: {
       guildId,
@@ -58,10 +56,20 @@ async function addMessagePrompt(guildId: string, prompt: string) {
 
   // split prompts with spaces, add to existing prompts immediately
   const newPrompts = guild.prompts;
-  const promptsSplit = prompt.split(" ");
+  let promptsSplit = prompt.split(" ");
+
+  // trim values
+  promptsSplit = promptsSplit.map((v) => v.trim());
+
+  // remove whitespace prompts
+  promptsSplit = promptsSplit.filter((v) => v != "");
 
   for (const promptVal of promptsSplit) {
-    newPrompts.push(promptVal);
+    // not our mention
+    if (promptVal == `<@${bot.user.id}>`) continue;
+
+    // no duplicates
+    if (!newPrompts.includes(promptVal)) newPrompts.push(promptVal);
   }
 
   // restrict to MAX_PROMPTS
@@ -81,13 +89,9 @@ async function addMessagePrompt(guildId: string, prompt: string) {
       },
     },
   });
-
-  await prisma.$disconnect();
 }
 
 async function getMessagePrompt(guildId: string): Promise<string> {
-  const prisma = new PrismaClient();
-
   const guild = await prisma.guilds.findUnique({
     where: {
       guildId,
@@ -98,14 +102,24 @@ async function getMessagePrompt(guildId: string): Promise<string> {
     },
   });
 
-  let finalPrompt = "";
-
-  for (let i = 0; i < getMinMax(0, 100); i++) {
-    finalPrompt +=
-      guild.prompts[Math.floor(Math.random() * guild.prompts.length)];
+  if (guild.prompts.length == 0) {
+    return "Luh Geeky don't got no replies for ya";
   }
 
-  await prisma.$disconnect();
+  let finalPrompt = "";
+
+  for (let i = 0; i < getMinMax(1, Math.min(guild.prompts.length, 10)); i++) {
+    const newPrompt =
+      guild.prompts[Math.floor(Math.random() * guild.prompts.length)];
+
+    // skip duplicate
+    if (finalPrompt.includes(newPrompt)) continue;
+
+    finalPrompt += newPrompt;
+
+    // space between prompts
+    finalPrompt += " ";
+  }
 
   return finalPrompt;
 }
@@ -219,8 +233,6 @@ function showYeatASCII() {
 async function setupMongo() {
   console.log(`Setting up MongoDB...`);
 
-  const prisma = new PrismaClient();
-
   await prisma.guilds.create({
     data: {
       guildId: "0",
@@ -244,8 +256,6 @@ async function setupMongo() {
       guildId: true,
     },
   });
-
-  await prisma.$disconnect();
 
   LOGGING_IDS = guilds.map((v) => v.guildId);
 
@@ -284,19 +294,13 @@ bot.on("messageCreate", async (message: Message) => {
   // No simple commands in this instance, comment
   // await bot.executeCommand(message);
 
-  // ignore bots
-  if (message.author.bot) return;
+  // allow bots, spicy
+  // if (message.author.bot) return;
+
+  // ignore us tho
+  if (message.author.id == bot.user.id) return;
 
   const guildId = message.guild.id;
-
-  // toggle ran, must check in realtime
-  if (process.env.RERUN_CHECKS_FOR == guildId) {
-    if (LOGGING_IDS.includes(guildId)) {
-      LOGGING_IDS.filter((v) => v != guildId);
-    } else {
-      LOGGING_IDS.push(guildId);
-    }
-  }
 
   // no more checks
   if (!LOGGING_IDS.includes(guildId)) return;
@@ -325,12 +329,7 @@ bot.on("messageCreate", async (message: Message) => {
 });
 
 async function run() {
-  // The following syntax should be used in the commonjs environment
-  //
-  // await importx(__dirname + "/{events,commands}/**/*.{ts,js}");
-
-  // The following syntax should be used in the ECMAScript environment
-  await importx(`${dirname(import.meta.url)}/{events,commands}/**/*.{ts,js}`);
+  await importx(__dirname + "/{events,commands}/**/*.{ts,js}");
 
   // Let's start the bot
   if (!process.env.BOT_TOKEN) {
@@ -339,6 +338,20 @@ async function run() {
 
   // Log in with your bot token
   await bot.login(process.env.BOT_TOKEN);
+}
+
+export function resetLoggingIds() {
+  LOGGING_IDS = [];
+}
+
+export function toggleLoggingId(guildId: string) {
+  const newLogging = !LOGGING_IDS.includes(guildId);
+
+  if (!newLogging) {
+    LOGGING_IDS = LOGGING_IDS.filter((v) => v != guildId);
+  } else {
+    LOGGING_IDS.push(guildId);
+  }
 }
 
 void run();
