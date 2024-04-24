@@ -12,7 +12,7 @@ RUN npm install
 
 # Move source files
 COPY src ./src
-COPY prisma/ .
+COPY prisma ./prisma
 COPY tsconfig.json   .
 
 # Build project
