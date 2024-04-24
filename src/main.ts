@@ -108,7 +108,7 @@ async function getMessagePrompt(guildId: string): Promise<string> {
 
   let finalPrompt = "";
 
-  for (let i = 0; i < getMinMax(1, Math.min(guild.prompts.length, 10)); i++) {
+  for (let i = 0; i < getMinMax(1, Math.min(guild.prompts.length, 15)); i++) {
     const newPrompt =
       guild.prompts[Math.floor(Math.random() * guild.prompts.length)];
 
