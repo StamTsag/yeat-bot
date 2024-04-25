@@ -391,15 +391,20 @@ bot.on("messageCreate", async (message: Message) => {
 });
 
 async function run() {
-  await importx(__dirname + "/{events,commands}/**/*.{ts,js}");
+  try {
+    await importx(__dirname + "/{events,commands}/**/*.{ts,js}");
 
-  // Let's start the bot
-  if (!process.env.BOT_TOKEN) {
-    throw Error("Could not find BOT_TOKEN in your environment");
+    // Let's start the bot
+    if (!process.env.BOT_TOKEN) {
+      throw Error("Could not find BOT_TOKEN in your environment");
+    }
+
+    // Log in with your bot token
+    await bot.login(process.env.BOT_TOKEN);
+  } catch (e) {
+    // handle kind of but wanna avoid restarts with crashes
+    console.log(e);
   }
-
-  // Log in with your bot token
-  await bot.login(process.env.BOT_TOKEN);
 }
 
 export function resetLoggingIds() {
