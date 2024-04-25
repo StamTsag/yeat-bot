@@ -93,17 +93,7 @@ async function addMessagePrompt(guildId: string, prompt: string) {
 
     data: {
       prompts: {
-        set: [
-          ...newPrompts,
-          ...[
-            "luh",
-            "geeky",
-            "https://tenor.com/view/yeat-skibidi-skibidi-yeat-yeat-skibity-skibidi-toilet-gif-13661983242605751936",
-            "ong",
-            "twizzy",
-            "cap",
-          ],
-        ],
+        set: newPrompts,
       },
     },
   });
@@ -120,15 +110,27 @@ async function getMessagePrompt(guildId: string): Promise<string> {
     },
   });
 
-  if (guild.prompts.length == 0) {
-    return "Luh Geeky don't got no replies for ya";
-  }
-
+  const prompts = [
+    ...guild.prompts,
+    ...[
+      "luh",
+      "geeky",
+      "https://tenor.com/view/yeat-skibidi-skibidi-yeat-yeat-skibity-skibidi-toilet-gif-13661983242605751936",
+      "ong",
+      "twizzy",
+      "cap",
+      "perc",
+      "X",
+      "yeatology",
+      "tonka",
+      "geek",
+      "honeybun",
+    ],
+  ];
   let finalPrompt = "";
 
-  for (let i = 0; i < getMinMax(1, Math.min(guild.prompts.length, 15)); i++) {
-    const newPrompt =
-      guild.prompts[Math.floor(Math.random() * guild.prompts.length)];
+  for (let i = 0; i < getMinMax(1, Math.min(prompts.length, 15)); i++) {
+    const newPrompt = prompts[Math.floor(Math.random() * prompts.length)];
 
     // skip duplicate
     if (finalPrompt.includes(newPrompt)) continue;

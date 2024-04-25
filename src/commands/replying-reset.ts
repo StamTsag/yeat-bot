@@ -52,14 +52,7 @@ export class Example {
 
       data: {
         prompts: {
-          set: [
-            "luh",
-            "geeky",
-            "https://tenor.com/view/yeat-skibidi-skibidi-yeat-yeat-skibity-skibidi-toilet-gif-13661983242605751936",
-            "ong",
-            "twizzy",
-            "cap",
-          ],
+          set: [],
         },
       },
     });
