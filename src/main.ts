@@ -1,5 +1,5 @@
 import { importx } from "@discordx/importer";
-import type { Interaction, Message } from "discord.js";
+import type { Interaction, Message, TextChannel } from "discord.js";
 import { IntentsBitField } from "discord.js";
 import { Client } from "discordx";
 import { configDotenv } from "dotenv";
@@ -291,6 +291,35 @@ async function setupMongo() {
   console.log(`MongoDB setup complete.`);
 }
 
+function setupAutomation() {
+  console.log(`Setting up automation...`);
+
+  async function sendScheduledGuildMessages() {
+    // Spam if a guild wants to
+    const guilds = await prisma.guilds.findMany({
+      select: {
+        guildId: true,
+        automated: true,
+        automationChannel: true,
+      },
+    });
+
+    for (const guild of guilds) {
+      if (!guild.automated) return;
+
+      const channel = bot.channels.cache.get(
+        guild.automationChannel
+      ) as TextChannel;
+
+      channel.send(await getMessagePrompt(guild.guildId)).then(() => {});
+    }
+  }
+
+  setInterval(async () => await sendScheduledGuildMessages(), 30 * 60 * 1000); // 30 minutes
+
+  console.log(`Automation setup.`);
+}
+
 bot.once("ready", async () => {
   // Synchronize applications commands with Discord
   await bot.initApplicationCommands();
@@ -311,6 +340,8 @@ bot.once("ready", async () => {
     setupKeepAlive();
     showYeatASCII();
   }
+
+  setupAutomation();
 
   console.log("Yeat is cookin'");
 });

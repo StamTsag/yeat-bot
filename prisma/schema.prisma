@@ -14,8 +14,10 @@ datasource db {
 }
 
 model guilds {
-  id      String   @id @default(auto()) @map("_id") @db.ObjectId
-  guildId String   @unique
-  logging Boolean  @default(false)
-  prompts String[] @default([])
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  guildId           String   @unique
+  logging           Boolean  @default(false)
+  prompts           String[] @default([])
+  automated         Boolean? @default(false)
+  automationChannel String?
 }
