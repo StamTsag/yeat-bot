@@ -299,13 +299,15 @@ function setupAutomation() {
     const guilds = await prisma.guilds.findMany({
       select: {
         guildId: true,
+        logging: true,
         automated: true,
         automationChannel: true,
       },
     });
 
     for (const guild of guilds) {
-      if (!guild.automated) return;
+      // mightve been turned off / not enabled
+      if (!guild.logging || !guild.automated) return;
 
       const channel = bot.channels.cache.get(
         guild.automationChannel

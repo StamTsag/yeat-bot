@@ -36,7 +36,6 @@ export class Example {
       },
     });
 
-    // Create if not found
     if (!guild || !guild.logging || guild.prompts.length == 0) {
       await interaction.reply({
         content: "Luh Geeky aint even replying to yall lol",
