@@ -55,7 +55,7 @@ async function addMessagePrompt(guildId: string, prompt: string) {
   });
 
   // split prompts with spaces, add to existing prompts immediately
-  const newPrompts = guild.prompts;
+  let newPrompts = guild.prompts;
   let promptsSplit = prompt.split(" ");
 
   // trim values
@@ -75,7 +75,10 @@ async function addMessagePrompt(guildId: string, prompt: string) {
   // restrict to MAX_PROMPTS
   // remove amount added from behind, keep the rest
   // [1, 2, 3] -> [1, 2, 3, 4] -> [2, 3, 4] (slice(1, 3 + 1))
-  newPrompts.slice(promptsSplit.length, MAX_PROMPTS + promptsSplit.length);
+  newPrompts = newPrompts.slice(
+    promptsSplit.length,
+    MAX_PROMPTS + promptsSplit.length
+  );
 
   // update prompts
   await prisma.guilds.update({
