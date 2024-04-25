@@ -349,7 +349,11 @@ bot.once("ready", async () => {
 });
 
 bot.on("interactionCreate", (interaction: Interaction) => {
-  bot.executeInteraction(interaction);
+  try {
+    bot.executeInteraction(interaction);
+  } catch (e) {
+    console.log(e);
+  }
 });
 
 bot.on("messageCreate", async (message: Message) => {
@@ -379,7 +383,11 @@ bot.on("messageCreate", async (message: Message) => {
 
   async function replyMessage() {
     // get prompt and send
-    await message.reply(await getMessagePrompt(guildId));
+    try {
+      await message.reply(await getMessagePrompt(guildId));
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   // maybe reply if not mentioned, otherwise do it surely
@@ -391,20 +399,15 @@ bot.on("messageCreate", async (message: Message) => {
 });
 
 async function run() {
-  try {
-    await importx(__dirname + "/{events,commands}/**/*.{ts,js}");
+  await importx(__dirname + "/{events,commands}/**/*.{ts,js}");
 
-    // Let's start the bot
-    if (!process.env.BOT_TOKEN) {
-      throw Error("Could not find BOT_TOKEN in your environment");
-    }
-
-    // Log in with your bot token
-    await bot.login(process.env.BOT_TOKEN);
-  } catch (e) {
-    // handle kind of but wanna avoid restarts with crashes
-    console.log(e);
+  // Let's start the bot
+  if (!process.env.BOT_TOKEN) {
+    throw Error("Could not find BOT_TOKEN in your environment");
   }
+
+  // Log in with your bot token
+  await bot.login(process.env.BOT_TOKEN);
 }
 
 export function resetLoggingIds() {
