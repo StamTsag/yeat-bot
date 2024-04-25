@@ -17,5 +17,5 @@ model guilds {
   id      String   @id @default(auto()) @map("_id") @db.ObjectId
   guildId String   @unique
   logging Boolean  @default(false)
-  prompts String[] @default([])
+  prompts String[] @default(["luh", "geeky", "https://tenor.com/view/yeat-skibidi-skibidi-yeat-yeat-skibity-skibidi-toilet-gif-13661983242605751936", "ong", "twizzy", "cap"])
 }

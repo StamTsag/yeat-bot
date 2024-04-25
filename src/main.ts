@@ -93,7 +93,17 @@ async function addMessagePrompt(guildId: string, prompt: string) {
 
     data: {
       prompts: {
-        set: newPrompts,
+        set: [
+          ...newPrompts,
+          ...[
+            "luh",
+            "geeky",
+            "https://tenor.com/view/yeat-skibidi-skibidi-yeat-yeat-skibity-skibidi-toilet-gif-13661983242605751936",
+            "ong",
+            "twizzy",
+            "cap",
+          ],
+        ],
       },
     },
   });
