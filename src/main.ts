@@ -43,7 +43,7 @@ function getMinMax(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-async function addMessagePrompt(guildId: string, prompt: string) {
+async function addMessagePrompt(guildId: string, message: Message) {
   const guild = await prisma.guilds.findUnique({
     where: {
       guildId,
@@ -56,7 +56,16 @@ async function addMessagePrompt(guildId: string, prompt: string) {
 
   // split prompts with spaces, add to existing prompts immediately
   let newPrompts = guild.prompts;
-  let promptsSplit = prompt.split(" ");
+  let promptsSplit = message.content.split(" ");
+
+  // add attachment urls aswell
+  for (const set of message.attachments) {
+    for (const item of set) {
+      if (typeof item == "object") {
+        promptsSplit.push(item.url);
+      }
+    }
+  }
 
   // Some prompts will be skipped
   let addedPrompts = 0;
@@ -326,7 +335,7 @@ bot.on("messageCreate", async (message: Message) => {
   if (!LOGGING_IDS.includes(guildId)) return;
 
   // add to prompts
-  await addMessagePrompt(guildId, message.content);
+  await addMessagePrompt(guildId, message);
 
   async function attemptMessageReply() {
     // 1 in 10 chance we reply
