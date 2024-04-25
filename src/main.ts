@@ -58,6 +58,9 @@ async function addMessagePrompt(guildId: string, prompt: string) {
   let newPrompts = guild.prompts;
   let promptsSplit = prompt.split(" ");
 
+  // Some prompts will be skipped
+  let addedPrompts = 0;
+
   // trim values
   promptsSplit = promptsSplit.map((v) => v.trim());
 
@@ -69,16 +72,18 @@ async function addMessagePrompt(guildId: string, prompt: string) {
     if (promptVal == `<@${bot.user.id}>`) continue;
 
     // no duplicates
-    if (!newPrompts.includes(promptVal)) newPrompts.push(promptVal);
+    if (!newPrompts.includes(promptVal)) {
+      addedPrompts++;
+      newPrompts.push(promptVal);
+    }
   }
 
   // restrict to MAX_PROMPTS
   // remove amount added from behind, keep the rest
   // [1, 2, 3] -> [1, 2, 3, 4] -> [2, 3, 4] (slice(1, 3 + 1))
-  newPrompts = newPrompts.slice(
-    promptsSplit.length,
-    MAX_PROMPTS + promptsSplit.length
-  );
+  if (newPrompts.length > MAX_PROMPTS) {
+    newPrompts = newPrompts.slice(addedPrompts, MAX_PROMPTS + addedPrompts);
+  }
 
   // update prompts
   await prisma.guilds.update({
