@@ -355,9 +355,7 @@ bot.once("ready", async () => {
 bot.on("interactionCreate", (interaction: Interaction) => {
   try {
     bot.executeInteraction(interaction);
-  } catch (e) {
-    console.log(e);
-  }
+  } catch (e) {}
 });
 
 bot.on("messageCreate", async (message: Message) => {
@@ -393,9 +391,7 @@ bot.on("messageCreate", async (message: Message) => {
     // get prompt and send
     try {
       await message.reply(await getMessagePrompt(guildId));
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   }
 
   // maybe reply if not mentioned, otherwise do it surely
