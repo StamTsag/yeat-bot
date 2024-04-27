@@ -384,7 +384,7 @@ bot.on("messageCreate", async (message: Message) => {
 
   async function attemptMessageReply() {
     // 1 in 10 chance we reply
-    if (getChanceHit(1)) {
+    if (getChanceHit(0.1)) {
       await replyMessage();
     }
   }
