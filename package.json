@@ -5,8 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "npx prisma generate && npx prisma db push && swc src -d output && copyfiles generated/* generated/local/** output",
-    "start": "run-s build start:cached",
-    "start:cached": "node -r @swc-node/register -r tsconfig-paths/register output/src/main.js",
+    "start": "node -r @swc-node/register -r tsconfig-paths/register output/src/main.js",
     "dev": "tsnd --loader ts-node/esm --ignore-watch generated/ --transpile-only --respawn --exit-child --clear -r tsconfig-paths/register src/main.ts",
     "check": "tsc"
   },
@@ -22,7 +21,6 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "imagekit": "^5.0.1",
-    "npm-run-all": "^4.1.5",
     "prisma": "^5.13.0",
     "qrcode": "^1.5.3",
     "querystring": "^0.2.1",
