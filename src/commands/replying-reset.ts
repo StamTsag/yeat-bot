@@ -36,7 +36,7 @@ export class Example {
     });
 
     // Create if not found
-    if (!guild || !guild.logging || guild.prompts.length == 0) {
+    if (!guild || !guild.logging) {
       await interaction.reply({
         content: "Luh Geeky got no data for your server",
         ephemeral: true,

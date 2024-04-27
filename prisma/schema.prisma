@@ -20,4 +20,5 @@ model guilds {
   prompts           String[] @default([])
   automated         Boolean? @default(false)
   automationChannel String?
+  mentionOnly       Boolean? @default(false)
 }

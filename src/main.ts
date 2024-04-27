@@ -9,6 +9,7 @@ import { prisma } from "./vars";
 configDotenv();
 
 let LOGGING_IDS = [];
+let MENTION_ONLY_IDS = [];
 const MAX_PROMPTS = 2000;
 
 export const bot = new Client({
@@ -283,10 +284,13 @@ async function setupMongo() {
 
     select: {
       guildId: true,
+      mentionOnly: true,
     },
   });
 
   LOGGING_IDS = guilds.map((v) => v.guildId);
+
+  MENTION_ONLY_IDS = guilds.filter((v) => v.mentionOnly).map((v) => v.guildId);
 
   console.log(`MongoDB setup complete.`);
 }
@@ -369,14 +373,18 @@ bot.on("messageCreate", async (message: Message) => {
   const guildId = message.guild.id;
 
   // no more checks
-  if (!LOGGING_IDS.includes(guildId)) return;
+  if (
+    !LOGGING_IDS.includes(guildId) ||
+    (MENTION_ONLY_IDS.includes(guildId) && !message.mentions.has(bot.user.id))
+  )
+    return;
 
   // add to prompts
   await addMessagePrompt(guildId, message);
 
   async function attemptMessageReply() {
     // 1 in 10 chance we reply
-    if (getChanceHit(0.1)) {
+    if (getChanceHit(1)) {
       await replyMessage();
     }
   }
@@ -412,6 +420,7 @@ async function run() {
 
 export function resetLoggingIds() {
   LOGGING_IDS = [];
+  MENTION_ONLY_IDS = [];
 }
 
 export function toggleLoggingId(guildId: string) {
@@ -421,6 +430,16 @@ export function toggleLoggingId(guildId: string) {
     LOGGING_IDS = LOGGING_IDS.filter((v) => v != guildId);
   } else {
     LOGGING_IDS.push(guildId);
+  }
+}
+
+export function toggleMentionId(guildId: string) {
+  const newMentionOnly = !MENTION_ONLY_IDS.includes(guildId);
+
+  if (!newMentionOnly) {
+    MENTION_ONLY_IDS = MENTION_ONLY_IDS.filter((v) => v != guildId);
+  } else {
+    MENTION_ONLY_IDS.push(guildId);
   }
 }
 

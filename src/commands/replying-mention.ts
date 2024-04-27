@@ -1,14 +1,16 @@
 import type { CommandInteraction } from "discord.js";
 import { Discord, Slash } from "discordx";
+import { toggleMentionId } from "main";
 import { prisma } from "vars";
 
 @Discord()
 export class Example {
   @Slash({
-    description: "Luh Geeky sends a text every 30 minutes (Server owner only)",
-    name: "automate-replying",
+    description:
+      "Toggles Luh Geeky replying only on mentions (Server owner only)",
+    name: "mention-replying",
   })
-  async replyingAutomate(interaction: CommandInteraction): Promise<void> {
+  async replyingMention(interaction: CommandInteraction): Promise<void> {
     const ownerId = (await interaction.client.application.fetch()).owner.id;
     const guildOwner = interaction.guild.ownerId;
     const guildId = interaction.guild.id;
@@ -32,7 +34,7 @@ export class Example {
       select: {
         logging: true,
         prompts: true,
-        automated: true,
+        mentionOnly: true,
       },
     });
 
@@ -45,7 +47,7 @@ export class Example {
     }
 
     // Toggle automation
-    const newAutomation = !guild.automated;
+    const newMentionOnly = !guild.mentionOnly;
 
     await prisma.guilds.update({
       where: {
@@ -53,15 +55,18 @@ export class Example {
       },
 
       data: {
-        automated: newAutomation,
-        automationChannel: interaction.channel.id,
+        mentionOnly: newMentionOnly,
       },
     });
 
-    if (newAutomation) {
-      await interaction.reply("Luh Geeky will spam yall every 30 minutes");
+    toggleMentionId(guildId);
+
+    if (newMentionOnly) {
+      await interaction.reply("Luh Geeky will only reply to mentions now");
     } else {
-      await interaction.reply("Luh Geeky will shush now");
+      await interaction.reply(
+        "Luh Geeky will reply to everything per chance now"
+      );
     }
   }
 }
